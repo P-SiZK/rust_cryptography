@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "vernum",
+    "rsa",
+    "padding",
+    "des",
+    "blockmode"
+]
