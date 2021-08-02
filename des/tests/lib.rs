@@ -1,4 +1,4 @@
-extern crate des;
+use des;
 
 use std::convert::TryInto;
 

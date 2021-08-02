@@ -1,4 +1,4 @@
-extern crate vernum;
+use vernum;
 
 use num_bigint::BigUint;
 

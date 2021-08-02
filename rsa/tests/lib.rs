@@ -1,4 +1,4 @@
-extern crate rsa;
+use rsa;
 
 use num_bigint::BigUint;
 
