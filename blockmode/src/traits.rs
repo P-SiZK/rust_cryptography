@@ -2,7 +2,7 @@
 /// K is block cipher key
 /// BLOCK_SIZE is bit length of a block
 pub trait BlockMode<C, K, const BLOCK_SIZE: usize> {
-    fn new() -> Self;
+    fn new(cipher: C) -> Self;
 
     fn encrypt_block(&self, blocks: Vec<Vec<u8>>, key: &K) -> Vec<u8>;
 
@@ -12,8 +12,8 @@ pub trait BlockMode<C, K, const BLOCK_SIZE: usize> {
         self.encrypt_block(block_from::<BLOCK_SIZE>(m), key)
     }
 
-    fn decrypt(&self, m: &Vec<u8>, key: &K) -> Vec<u8> {
-        self.decrypt_block(block_from::<BLOCK_SIZE>(m), key)
+    fn decrypt(&self, c: &Vec<u8>, key: &K) -> Vec<u8> {
+        self.decrypt_block(block_from::<BLOCK_SIZE>(c), key)
     }
 }
 

@@ -15,7 +15,7 @@ impl<C, K, const BLOCK_SIZE: usize> BlockMode<C, K, BLOCK_SIZE> for ECB<C, K, BL
 where
     C: BlockCipher<K, BLOCK_SIZE>,
 {
-    fn new() -> Self {
+    fn new(_cipher: C) -> Self {
         Self {
             _c: PhantomData,
             _k: PhantomData,
