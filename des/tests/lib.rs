@@ -1,15 +1,15 @@
-use des;
+use des::DES;
 
-use std::convert::TryInto;
+use blockcipher::BlockCipher;
 
 #[test]
 fn decrypt() {
     let plain = "hogefuga";
-    let m = u64::from_be_bytes(plain.as_bytes().try_into().unwrap());
-    let key = des::key_gen();
-    let c = des::encrypt(m, &key);
-    let m_ = des::decrypt(c, &key);
-    let plain_ = String::from_utf8(m_.to_be_bytes().to_vec()).unwrap();
+    let m = plain.as_bytes().to_vec();
+    let key = DES::key_gen();
+    let c = DES::encrypt(&m, &key);
+    let m_ = DES::decrypt(&c, &key);
+    let plain_ = String::from_utf8(m_.clone()).unwrap();
     assert_eq!(m, m_);
     assert_eq!(plain, plain_);
 }

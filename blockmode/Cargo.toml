@@ -7,3 +7,6 @@ edition = "2018"
 
 [dependencies]
 blockcipher = { path = "../blockcipher"}
+
+[dev-dependencies]
+des = { path = "../des"}

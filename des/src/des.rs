@@ -1,41 +1,50 @@
 // reference: https://csrc.nist.gov/csrc/media/publications/fips/46/3/archive/1999-10-25/documents/fips46-3.pdf
 
+use blockcipher::BlockCipher;
 use rand::{self, Rng, SeedableRng};
 
+use std::convert::TryInto;
+
 use crate::consts::*;
+
+pub struct DES;
 
 pub struct DESKey {
     key: u64,
 }
 
-pub fn key_gen() -> DESKey {
-    let mut rng = rand::rngs::StdRng::from_entropy();
-    let mut key: u64 = rng.gen();
-    key &= 0xfefe_fefe_fefe_fefe;
+impl BlockCipher<DESKey, 64> for DES {
+    fn key_gen() -> DESKey {
+        let mut rng = rand::rngs::StdRng::from_entropy();
+        let mut key: u64 = rng.gen();
+        key &= 0xfefe_fefe_fefe_fefe;
 
-    // calculation odd parity
-    let mut parity = key;
-    parity ^= parity >> 4;
-    parity ^= parity >> 2;
-    parity ^= parity >> 1;
-    parity &= 0x0101_0101_0101_0101;
-    parity ^= 0x0101_0101_0101_0101;
-    key |= parity;
+        // calculation odd parity
+        let mut parity = key;
+        parity ^= parity >> 4;
+        parity ^= parity >> 2;
+        parity ^= parity >> 1;
+        parity &= 0x0101_0101_0101_0101;
+        parity ^= 0x0101_0101_0101_0101;
+        key |= parity;
 
-    DESKey { key: key }
-}
+        DESKey { key: key }
+    }
 
-pub fn encrypt(m: u64, key: &DESKey) -> u64 {
-    let subkeys = subkey_gen(key);
+    fn encrypt(m: &Vec<u8>, key: &DESKey) -> Vec<u8> {
+        let subkeys = subkey_gen(key);
 
-    cipher_algorithm(m, &subkeys)
-}
+        let m = u64::from_be_bytes(m.clone().try_into().unwrap());
+        cipher_algorithm(m, &subkeys).to_be_bytes().to_vec()
+    }
 
-pub fn decrypt(c: u64, key: &DESKey) -> u64 {
-    let mut subkeys = subkey_gen(key);
-    subkeys.reverse();
+    fn decrypt(c: &Vec<u8>, key: &DESKey) -> Vec<u8> {
+        let mut subkeys = subkey_gen(key);
+        subkeys.reverse();
 
-    cipher_algorithm(c, &subkeys)
+        let c: u64 = u64::from_be_bytes(c.clone().try_into().unwrap());
+        cipher_algorithm(c, &subkeys).to_be_bytes().to_vec()
+    }
 }
 
 fn cipher_algorithm(val: u64, subkeys: &[u64]) -> u64 {
