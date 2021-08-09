@@ -1,19 +1,28 @@
+use blockcipher::BlockCipher;
+use padding::Padding;
+
 /// C is block cipher algorithm
 /// K is block cipher key
 /// BLOCK_SIZE is bit length of a block
-pub trait BlockMode<C, K, const BLOCK_SIZE: usize> {
-    fn new(cipher: C) -> Self;
+pub trait BlockMode<C, K, P, const BLOCK_SIZE: usize>
+where
+    C: BlockCipher<K, BLOCK_SIZE>,
+    P: Padding<BLOCK_SIZE>,
+{
+    fn new(cipher: C, padding: P) -> Self;
 
     fn encrypt_block(&self, blocks: Vec<Vec<u8>>, key: &K) -> Vec<u8>;
 
     fn decrypt_block(&self, blocks: Vec<Vec<u8>>, key: &K) -> Vec<u8>;
 
     fn encrypt(&self, m: &Vec<u8>, key: &K) -> Vec<u8> {
-        self.encrypt_block(block_from::<BLOCK_SIZE>(m), key)
+        let m_pad = &P::pad(m);
+        self.encrypt_block(block_from::<BLOCK_SIZE>(m_pad), key)
     }
 
     fn decrypt(&self, c: &Vec<u8>, key: &K) -> Vec<u8> {
-        self.decrypt_block(block_from::<BLOCK_SIZE>(c), key)
+        let m_pad = &self.decrypt_block(block_from::<BLOCK_SIZE>(c), key);
+        P::unpad(m_pad)
     }
 }
 
