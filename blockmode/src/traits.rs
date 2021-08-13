@@ -27,9 +27,8 @@ where
 }
 
 fn block_from<const BLOCK_SIZE: usize>(bytes: &Vec<u8>) -> Vec<Vec<u8>> {
-    use std::convert::TryInto;
     bytes
         .chunks_exact(BLOCK_SIZE / 8)
-        .map(|x| x.try_into().unwrap())
+        .map(|x| x.to_vec())
         .collect()
 }

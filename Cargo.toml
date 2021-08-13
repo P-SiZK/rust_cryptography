@@ -1,10 +1,11 @@
 [workspace]
 
 members = [
-    "vernum",
     "rsa",
+    "vernum",
     "padding",
-    "des",
     "blockmode",
     "blockcipher",
+    "des",
+    "aes",
 ]
