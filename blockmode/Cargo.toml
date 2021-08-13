@@ -10,4 +10,4 @@ blockcipher = { path = "../blockcipher"}
 padding = { path = "../padding" }
 
 [dev-dependencies]
-des = { path = "../des"}
+aes = { path = "../aes"}

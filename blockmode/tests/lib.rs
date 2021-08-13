@@ -1,17 +1,17 @@
 use blockmode::{BlockMode, ECB};
 
+use aes::AES128;
 use blockcipher::BlockCipher;
-use des::DES;
-use padding::ZeroPadding;
+use padding::NoPadding;
 
 #[test]
-fn ecb_des_zeropad_decrypt() {
-    let des_ecb = ECB::new(DES, ZeroPadding);
-    let plain = "hogefugapiyofoobarbaz??";
+fn ecb_aes128_encrypt() {
+    let aes_ecb = ECB::new(AES128, NoPadding);
+    let plain = "hogefugapiyohogefugapiyohogefuga";
     let m = plain.as_bytes().to_vec();
-    let key = DES::key_gen();
-    let c = des_ecb.encrypt(&m, &key);
-    let m_ = des_ecb.decrypt(&c, &key);
+    let key = AES128::key_gen();
+    let c = aes_ecb.encrypt(&m, &key);
+    let m_ = aes_ecb.decrypt(&c, &key);
     let plain_ = String::from_utf8(m_.clone()).unwrap();
     assert_eq!(m, m_);
     assert_eq!(plain, plain_);

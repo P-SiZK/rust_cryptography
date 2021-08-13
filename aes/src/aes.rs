@@ -3,57 +3,77 @@ use rand::{self, Rng, SeedableRng};
 
 use crate::consts::*;
 
-pub struct AES<const NK: usize, const NR: usize>;
-
-pub type AES128 = AES<4, 10>;
-pub type AES192 = AES<6, 12>;
-pub type AES256 = AES<8, 14>;
-
 pub struct AESKey<const NK: usize> {
     key: [u32; NK],
 }
 
-impl<const NK: usize, const NR: usize> BlockCipher<AESKey<NK>, 128> for AES<NK, NR> {
-    fn key_gen() -> AESKey<NK> {
-        let mut rng = rand::rngs::StdRng::from_entropy();
-        let mut key = [0u32; NK];
-        rng.fill(&mut key[..]);
-        AESKey { key: key }
-    }
+macro_rules! define_aes {
+    (
+        $name:ident,
+        $nk: expr,
+        $nr: expr
+    ) => {
+        pub struct $name;
 
-    fn encrypt(m: &Vec<u8>, key: &AESKey<NK>) -> Vec<u8> {
-        let mut state = m.clone();
-        let w = key_expansion::<NK, NR>(&key.key.to_vec());
-        add_round_key(&mut state, &w[0..4]);
-        for round in 1..NR {
-            sub_bytes(&mut state);
-            shift_rows(&mut state);
-            mix_columns(&mut state);
-            add_round_key(&mut state, &w[round * 4..(round + 1) * 4]);
+        impl BlockCipher<AESKey<$nk>, 128> for $name {
+            fn key_gen() -> AESKey<$nk> {
+                aes_key_gen::<$nk>()
+            }
+
+            fn encrypt(m: &Vec<u8>, key: &AESKey<$nk>) -> Vec<u8> {
+                aes_encrypt::<$nk, $nr>(m, key)
+            }
+
+            fn decrypt(c: &Vec<u8>, key: &AESKey<$nk>) -> Vec<u8> {
+                aes_decrypt::<$nk, $nr>(c, key)
+            }
         }
+    };
+}
+
+define_aes!(AES128, 4, 10);
+define_aes!(AES192, 6, 12);
+define_aes!(AES256, 8, 14);
+
+fn aes_key_gen<const NK: usize>() -> AESKey<NK> {
+    let mut rng = rand::rngs::StdRng::from_entropy();
+    let mut key = [0u32; NK];
+    rng.fill(&mut key[..]);
+    AESKey { key: key }
+}
+
+fn aes_encrypt<const NK: usize, const NR: usize>(m: &Vec<u8>, key: &AESKey<NK>) -> Vec<u8> {
+    let mut state = m.clone();
+    let w = key_expansion::<NK, NR>(&key.key.to_vec());
+    add_round_key(&mut state, &w[0..4]);
+    for round in 1..NR {
         sub_bytes(&mut state);
         shift_rows(&mut state);
-        add_round_key(&mut state, &w[NR * 4..(NR + 1) * 4]);
-
-        state
+        mix_columns(&mut state);
+        add_round_key(&mut state, &w[round * 4..(round + 1) * 4]);
     }
+    sub_bytes(&mut state);
+    shift_rows(&mut state);
+    add_round_key(&mut state, &w[NR * 4..(NR + 1) * 4]);
 
-    fn decrypt(c: &Vec<u8>, key: &AESKey<NK>) -> Vec<u8> {
-        let mut state = c.clone();
-        let w = key_expansion::<NK, NR>(&key.key.to_vec());
-        add_round_key(&mut state, &w[NR * 4..(NR + 1) * 4]);
-        for round in (1..NR).rev() {
-            inv_shift_rows(&mut state);
-            inv_sub_bytes(&mut state);
-            add_round_key(&mut state, &w[round * 4..(round + 1) * 4]);
-            inv_mix_columns(&mut state);
-        }
+    state
+}
+
+fn aes_decrypt<const NK: usize, const NR: usize>(c: &Vec<u8>, key: &AESKey<NK>) -> Vec<u8> {
+    let mut state = c.clone();
+    let w = key_expansion::<NK, NR>(&key.key.to_vec());
+    add_round_key(&mut state, &w[NR * 4..(NR + 1) * 4]);
+    for round in (1..NR).rev() {
         inv_shift_rows(&mut state);
         inv_sub_bytes(&mut state);
-        add_round_key(&mut state, &w[0..4]);
-
-        state
+        add_round_key(&mut state, &w[round * 4..(round + 1) * 4]);
+        inv_mix_columns(&mut state);
     }
+    inv_shift_rows(&mut state);
+    inv_sub_bytes(&mut state);
+    add_round_key(&mut state, &w[0..4]);
+
+    state
 }
 
 fn sub_bytes(state: &mut Vec<u8>) {
@@ -223,7 +243,6 @@ fn sub_word(word: u32) -> u32 {
 fn rot_word(word: u32) -> u32 {
     word.rotate_left(8)
 }
-
 
 #[test]
 /// reference: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
