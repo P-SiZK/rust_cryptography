@@ -1,4 +1,4 @@
-use blockcipher::blockmode::{BlockMode, ECB};
+use blockmode::{BlockMode, ECB};
 
 use blockcipher::aes::AES128;
 use blockcipher::BlockCipher;
