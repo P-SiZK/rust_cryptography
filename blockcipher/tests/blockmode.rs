@@ -1,11 +1,11 @@
-use blockmode::{BlockMode, ECB};
+use blockcipher::blockmode::{BlockMode, ECB};
 
-use aes::AES128;
+use blockcipher::aes::AES128;
 use blockcipher::BlockCipher;
 use padding::NoPadding;
 
 #[test]
-fn ecb_aes128_encrypt() {
+fn ecb_aes128() {
     let aes_ecb = ECB::new(AES128, NoPadding);
     let plain = "hogefugapiyohogefugapiyohogefuga";
     let m = plain.as_bytes().to_vec();
@@ -15,6 +15,4 @@ fn ecb_aes128_encrypt() {
     let plain_ = String::from_utf8(m_.clone()).unwrap();
     assert_eq!(m, m_);
     assert_eq!(plain, plain_);
-    println!("{:?}", m_);
-    println!("{}", plain_);
 }

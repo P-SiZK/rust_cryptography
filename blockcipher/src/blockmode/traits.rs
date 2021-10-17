@@ -1,4 +1,4 @@
-use blockcipher::BlockCipher;
+use crate::BlockCipher;
 use padding::Padding;
 
 /// C is block cipher algorithm

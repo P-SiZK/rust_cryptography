@@ -1,11 +1,11 @@
 // reference: https://csrc.nist.gov/csrc/media/publications/fips/46/3/archive/1999-10-25/documents/fips46-3.pdf
 
-use blockcipher::BlockCipher;
+use crate::BlockCipher;
 use rand::{self, Rng, SeedableRng};
 
 use std::convert::TryInto;
 
-use crate::consts::*;
+use crate::des::consts::*;
 
 pub struct DES;
 

@@ -1,7 +1,7 @@
-use blockcipher::BlockCipher;
+use crate::BlockCipher;
 use rand::{self, Rng, SeedableRng};
 
-use crate::consts::*;
+use crate::aes::consts::*;
 
 pub struct AESKey<const NK: usize> {
     key: [u32; NK],

@@ -1,6 +1,6 @@
-use crate::traits::BlockMode;
+use crate::blockmode::traits::BlockMode;
 
-use blockcipher::BlockCipher;
+use crate::BlockCipher;
 use padding::Padding;
 use std::marker::PhantomData;
 
